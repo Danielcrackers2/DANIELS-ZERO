@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>Daniels Zero • Free Chatting Platform</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --deep-space: #0b0c15;
+      --eclipse: #141625;
+      --night-slate: #1e2030;
+      --soft-indigo: #2d325a;
+      --electric-violet: #7c4dff;
+      --lilac-mist: #b794f4;
+      --pure-white: #ffffff;
+      --frost: #f0edf6;
+      --glacier-blue: #a5b4fc;
+      --success-mint: #2dd4bf;
+      --warning-amber: #fbbf24;
+      --coral-red: #ff6b6b;
+      --gradient-primary: linear-gradient(135deg, #4f3cc9, #7c4dff);
+      --gradient-message: linear-gradient(145deg, #2a2f4f, #1f2335);
+      --gradient-voice: linear-gradient(135deg, #ff6b6b, #ee5a24);
+      --gradient-location: linear-gradient(135deg, #2dd4bf, #0d9488);
+      --glass-bg: rgba(20, 22, 37, 0.85);
+      --glass-border: rgba(124, 77, 255, 0.25);
+      --backdrop-blur: blur(16px);
+      --shadow-elevated: 0 20px 35px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(124, 77, 255, 0.2);
+      --shadow-voice: 0 8px 25px rgba(255, 107, 107, 0.4);
+      --shadow-location: 0 8px 25px rgba(45, 212, 191, 0.3);
+      --transition-smooth: all 0.25s ease;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 20% 10%, #1e1a3a, #090b14);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      margin: 0;
+    }
+
+    .platform {
+      width: 100%;
+      max-width: 1300px;
+      height: 90vh;
+      max-height: 950px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--backdrop-blur);
+      -webkit-backdrop-filter: var(--backdrop-blur);
+      border-radius: 3.5rem;
+      box-shadow: var(--shadow-elevated);
+      border: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--gradient-primary);
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 2rem;
+      box-shadow: 0 10px 30px rgba(124, 77, 255, 0.5);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.5s forwards;
+      font-weight: 500;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    @keyframes slideInRight {
+      from { transform: translateX(120%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; visibility: hidden; }
+    }
+
+    .top-bar {
+      padding: 1.2rem 2.5rem;
+      background: rgba(12, 13, 26, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(124, 77, 255, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .brand i {
+      font-size: 2.4rem;
+      color: var(--electric-violet);
+      filter: drop-shadow(0 0 8px #7c4dffaa);
+      transition: transform 0.3s;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { filter: drop-shadow(0 0 8px #7c4dffaa); }
+      50% { filter: drop-shadow(0 0 20px #b794f4); }
+    }
+
+    .brand i:hover {
+      transform: rotate(10deg) scale(1.05);
+    }
+
+    .brand h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      background: linear-gradient(to right, #e0d9ff, #b794f4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 15px #7c4dff40;
+      line-height: 1.2;
+    }
+
+    .brand span {
+      font-weight: 300;
+      font-size: 1rem;
+      -webkit-text-fill-color: #a5b4fc;
+      margin-left: 0.3rem;
+      letter-spacing: 0.5px;
+    }
+
+    .status-badge {
+      background: rgba(45, 50, 90, 0.5);
+      backdrop-filter: blur(12px);
+      padding: 0.6rem 1.6rem;
+      border-radius: 3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      border: 1px solid rgba(124, 77, 255, 0.5);
+      color: #d1d5ff;
+      font-weight: 500;
+    }
+
+    .status-badge i {
+      color: #2dd4bf;
+      font-size: 0.8rem;
+      text-shadow: 0 0 8px #2dd4bf;
+    }
+
+    .chat-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    .contacts-sidebar {
+      width: 300px;
+      background: rgba(16, 18, 32, 0.7);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-right: 1px solid rgba(124, 77, 255, 0.25);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 0.8rem;
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 0 0.4rem;
+    }
+
+    .sidebar-header h3 {
+      color: #e0d9ff;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+    }
+
+    .sync-contacts-btn {
+      background: rgba(124, 77, 255, 0.2);
+      border: 1px solid #7c4dff;
+      color: #e0d9ff;
+      padding: 0.5rem 1rem;
+      border-radius: 2rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: 0.3s;
+      white-space: nowrap;
+    }
+
+    .sync-contacts-btn:hover {
+      background: #7c4dff40;
+      color: white;
+      box-shadow: 0 0 20px rgba(124, 77, 255, 0.4);
+    }
+
+    .search-box {
+      background: rgba(30, 32, 48, 0.7);
+      border-radius: 2.5rem;
+      padding: 0.7rem 1.2rem;
+      margin: 0 0.4rem 1.5rem 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      border: 1px solid rgba(124, 77, 255, 0.4);
+    }
+
+    .search-box i {
+      color: #b794f4;
+      font-size: 1rem;
+    }
+
+    .search-box input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #f0edf6;
+      font-size: 0.95rem;
+      width: 100%;
+    }
+
+    .search-box input::placeholder {
+      color: #8b8fbc;
+      font-weight: 400;
+    }
+
+    .contact-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding-right: 4px;
+    }
+
+    .no-contacts {
+      text-align: center;
+      color: #8b8fbc;
+      padding: 2rem;
+      font-size: 0.9rem;
+    }
+
+    .no-contacts i {
+      font-size: 2rem;
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #7c4dff;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      padding: 0.8rem 1rem;
+      border-radius: 2rem;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      border: 1px solid transparent;
+      background: rgba(30, 34, 55, 0.4);
+      margin-bottom: 0.2rem;
+    }
+
+    .contact-item:hover {
+      background: rgba(45, 50, 90, 0.7);
+      border-color: #7c4dff60;
+    }
+
+    .contact-item.active {
+      background: var(--gradient-primary);
+      border-color: #ffffff30;
+      box-shadow: 0 8px 18px #7c4dff50;
+    }
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(145deg, #4f3cc9, #2d325a);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      font-size: 1.2rem;
+      box-shadow: 0 0 12px #7c4dff80;
+      border: 2px solid #b794f480;
+      flex-shrink: 0;
+    }
+
+    .contact-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .contact-info h4 {
+      color: #f0edf6;
+      font-weight: 600;
+      font-size: 1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .contact-info p {
+      color: #a5b4fc;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chat-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: rgba(11, 12, 21, 0.5);
+      backdrop-filter: blur(8px);
+    }
+
+    .empty-chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #8b8fbc;
+      gap: 1rem;
+    }
+
+    .empty-chat i {
+      font-size: 5rem;
+      color: #7c4dff40;
+    }
+
+    .empty-chat h3 {
+      font-size: 1.3rem;
+      color: #b794f4;
+    }
+
+    .empty-chat p {
+      font-size: 0.9rem;
+    }
+
+    .chat-header {
+      padding: 1.2rem 2rem;
+      background: rgba(20, 22, 37, 0.7);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid #7c4dff30;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chat-partner {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .chat-partner .avatar {
+      width: 48px;
+      height: 48px;
+      font-size: 1.3rem;
+    }
+
+    .partner-details h3 {
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .partner-details span {
+      color: #2dd4bf;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .chat-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .chat-actions i {
+      color: #b794f4;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: 0.2s;
+      padding: 0.5rem;
+      border-radius: 50%;
+    }
+
+    .chat-actions i:hover {
+      color: #ffffff;
+      background: rgba(124, 77, 255, 0.3);
+      text-shadow: 0 0 12px #7c4dff;
+    }
+
+    .messages-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2rem 1.8rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      background: transparent;
+    }
+
+    .message-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.6rem;
+      max-width: 75%;
+      animation: fadeInUp 0.3s ease;
+    }
+
+    .message-row.incoming {
+      align-self: flex-start;
+    }
+
+    .message-row.outgoing {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .bubble {
+      background: var(--gradient-message);
+      padding: 0.9rem 1.4rem;
+      border-radius: 1.8rem 1.8rem 1.8rem 0.4rem;
+      color: #f0edf6;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.4);
+      border: 1px solid #ffffff15;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+
+    .outgoing .bubble {
+      background: linear-gradient(145deg, #4f3cc9, #6147ff);
+      border-radius: 1.8rem 1.8rem 0.4rem 1.8rem;
+      border-color: #b794f460;
+    }
+
+    .voice-message {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.5rem 0;
+    }
+
+    .voice-message i {
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #ff6b6b;
+      transition: 0.2s;
+    }
+
+    .voice-message i:hover {
+      color: #ff4444;
+      transform: scale(1.1);
+    }
+
+    .voice-wave {
+      flex: 1;
+      height: 30px;
+      background: rgba(255, 107, 107, 0.2);
+      border-radius: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 0 0.5rem;
+    }
+
+    .wave-bar {
+      width: 3px;
+      background: #ff6b6b;
+      border-radius: 2px;
+      animation: wave 0.8s ease-in-out infinite;
+    }
+
+    .wave-bar:nth-child(1) { height: 10px; animation-delay: 0s; }
+    .wave-bar:nth-child(2) { height: 20px; animation-delay: 0.1s; }
+    .wave-bar:nth-child(3) { height: 15px; animation-delay: 0.2s; }
+    .wave-bar:nth-child(4) { height: 25px; animation-delay: 0.3s; }
+    .wave-bar:nth-child(5) { height: 18px; animation-delay: 0.4s; }
+    .wave-bar:nth-child(6) { height: 22px; animation-delay: 0.5s; }
+    .wave-bar:nth-child(7) { height: 12px; animation-delay: 0.6s; }
+
+    @keyframes wave {
+      0%, 100% { transform: scaleY(1); }
+      50% { transform: scaleY(2); }
+    }
+
+    .location-share {
+      background: rgba(45, 212, 191, 0.15);
+      border: 2px solid rgba(45, 212, 191, 0.5);
+      border-radius: 1.5rem;
+      padding: 0.8rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: var(--shadow-location);
+    }
+
+    .location-share:hover {
+      background: rgba(45, 212, 191, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .location-share i {
+      font-size: 1.8rem;
+      color: #2dd4bf;
+    }
+
+    .location-info {
+      color: #ccfbf1;
+      font-size: 0.85rem;
+    }
+
+    .location-info strong {
+      display: block;
+      font-size: 0.9rem;
+    }
+
+    .time-stamp {
+      font-size: 0.7rem;
+      color: #8b8fbc;
+      margin-top: 0.3rem;
+      display: block;
+    }
+
+    .message-input-area {
+      padding: 1rem 2rem;
+      background: rgba(20, 22, 37, 0.8);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid #7c4dff40;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+
+    .action-btn {
+      background: rgba(124, 77, 255, 0.2);
+      border: 1px solid rgba(124, 77, 255, 0.5);
+      color: #b794f4;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.3s;
+      font-size: 1rem;
+    }
+
+    .action-btn:hover {
+      background: var(--gradient-primary);
+      color: white;
+      box-shadow: 0 0 15px rgba(124, 77, 255, 0.5);
+    }
+
+    .action-btn.voice-btn {
+      border-color: rgba(255, 107, 107, 0.5);
+      color: #ff6b6b;
+    }
+
+    .action-btn.voice-btn:hover {
+      background: var(--gradient-voice);
+      box-shadow: var(--shadow-voice);
+    }
+
+    .action-btn.voice-btn.recording {
+      animation: pulse-red 0.8s infinite;
+      background: #ff4444;
+      color: white;
+      border-color: #ff4444;
+    }
+
+    @keyframes pulse-red {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7); }
+      50% { box-shadow: 0 0 0 15px rgba(255, 68, 68, 0); }
+    }
+
+    .action-btn.location-btn {
+      border-color: rgba(45, 212, 191, 0.5);
+      color: #2dd4bf;
+    }
+
+    .action-btn.location-btn:hover {
+      background: var(--gradient-location);
+      box-shadow: var(--shadow-location);
+    }
+
+    .input-wrapper {
+      flex: 1;
+      background: rgba(30, 32, 48, 0.8);
+      border-radius: 3rem;
+      display: flex;
+      align-items: center;
+      padding: 0.3rem 0.3rem 0.3rem 1.5rem;
+      border: 1px solid #7c4dff60;
+    }
+
+    .input-wrapper input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 0.9rem 0;
+      color: white;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .input-wrapper input::placeholder {
+      color: #9b9fcc;
+    }
+
+    .send-btn {
+      background: var(--gradient-primary);
+      border: none;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.3s;
+      box-shadow: 0 6px 16px #7c4dff70;
+      flex-shrink: 0;
+    }
+
+    .send-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 22px #7c4dff;
+    }
+
+    .support-footer {
+      background: rgba(12, 13, 26, 0.8);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid rgba(124, 77, 255, 0.3);
+      padding: 0.7rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      color: #c7d2fe;
+      font-size: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    .support-footer a {
+      color: #b794f4;
+      text-decoration: none;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: 0.2s;
+    }
+
+    .support-footer a:hover {
+      color: white;
+      text-shadow: 0 0 8px #7c4dff;
+    }
+
+    /* Recording indicator */
+    .recording-indicator {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 68, 68, 0.9);
+      color: white;
+      padding: 0.8rem 2rem;
+      border-radius: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.3);
+      font-weight: 500;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+      to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+
+    .recording-dot {
+      width: 12px;
+      height: 12px;
+      background: white;
+      border-radius: 50%;
+      animation: pulse-red 0.8s infinite;
+    }
+
+    /* Location modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal {
+      background: var(--night-slate);
+      border-radius: 2rem;
+      padding: 2rem;
+      max-width: 400px;
+      width: 90%;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--shadow-elevated);
+      color: white;
+      text-align: center;
+    }
+
+    .modal h3 {
+      margin-bottom: 1rem;
+      color: #e0d9ff;
+    }
+
+    .modal p {
+      color: #a5b4fc;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .modal button {
+      background: var(--gradient-primary);
+      border: none;
+      padding: 0.8rem 2rem;
+      border-radius: 2rem;
+      color: white;
+      cursor: pointer;
+      margin: 0.3rem;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    .modal button:hover {
+      box-shadow: 0 5px 20px rgba(124, 77, 255, 0.5);
+    }
+
+    .modal button.cancel {
+      background: rgba(255,255,255,0.1);
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .contact-list::-webkit-scrollbar, .messages-container::-webkit-scrollbar {
+      width: 5px;
+    }
+    .contact-list::-webkit-scrollbar-thumb, .messages-container::-webkit-scrollbar-thumb {
+      background: #7c4dff80;
+      border-radius: 10px;
+    }
+
+    @media (max-width: 750px) {
+      .contacts-sidebar {
+        width: 260px;
+      }
+      .brand h1 {
+        font-size: 1.4rem;
+      }
+      .message-input-area {
+        padding: 0.8rem 1rem;
+        gap: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="platform">
+    <!-- Header -->
+    <header class="top-bar">
+      <div class="brand">
+        <i class="fas fa-comment-dots"></i>
+        <h1>DANIELS ZERO<span>CHATTING PLATFORM</span></h1>
+      </div>
+      <div class="status-badge">
+        <i class="fas fa-circle"></i> Secure · Free · Live
+        <i class="fas fa-shield-alt" style="margin-left: 0.5rem;"></i>
+      </div>
+    </header>
+
+    <!-- Main Chat Container -->
+    <div class="chat-container">
+      <!-- Sidebar -->
+      <aside class="contacts-sidebar">
+        <div class="sidebar-header">
+          <h3><i class="fas fa-users"></i> Contacts</h3>
+          <button class="sync-contacts-btn" id="syncContactsBtn">
+            <i class="fas fa-sync-alt"></i> Import Contacts
+          </button>
+        </div>
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search contacts..." id="searchInput">
+        </div>
+        <div class="contact-list" id="contactList">
+          <div class="no-contacts">
+            <i class="fas fa-address-book"></i>
+            <p>No contacts yet</p>
+            <p style="font-size:0.75rem;">Click "Import Contacts" to start chatting</p>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Chat Area -->
+      <section class="chat-main">
+        <div class="chat-header" id="chatHeader" style="display: none;">
+          <div class="chat-partner">
+            <div class="avatar" id="activeAvatar">?</div>
+            <div class="partner-details">
+              <h3 id="activeName">Select a contact</h3>
+              <span id="activeStatus"><i class="fas fa-circle" style="font-size: 0.5rem; color: #6b7280;"></i> offline</span>
+            </div>
+          </div>
+          <div class="chat-actions">
+            <i class="fas fa-video" title="Video call"></i>
+            <i class="fas fa-phone-alt" title="Voice call"></i>
+            <i class="fas fa-ellipsis-v" title="More options"></i>
+          </div>
+        </div>
+
+        <div class="messages-container" id="messagesContainer">
+          <div class="empty-chat" id="emptyChat">
+            <i class="fas fa-comments"></i>
+            <h3>Welcome to Daniels Zero</h3>
+            <p>Import your contacts and start chatting for free</p>
+            <p style="font-size:0.8rem; color:#7c4dff;">🔒 End-to-end encrypted</p>
+          </div>
+        </div>
+
+        <div class="message-input-area" id="messageInputArea" style="display: none;">
+          <button class="action-btn voice-btn" id="voiceBtn" title="Record voice note">
+            <i class="fas fa-microphone"></i>
+          </button>
+          <button class="action-btn location-btn" id="locationBtn" title="Share location">
+            <i class="fas fa-map-marker-alt"></i>
+          </button>
+          <div class="input-wrapper">
+            <input type="text" placeholder="Type your message..." id="messageInput">
+            <button class="send-btn" id="sendButton"><i class="fas fa-paper-plane"></i></button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Footer -->
+    <div class="support-footer">
+      <i class="fas fa-headset"></i>
+      <span>24/7 Support:</span>
+      <a href="mailto:muhindodaniel@gmail.com"><i class="fas fa-envelope"></i> muhindodaniela@gmail.com</a>
+      <span style="margin: 0 0.5rem;">|</span>
+      <i class="fas fa-shield-alt"></i> Free & Secure
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toastContainer"></div>
+
+  <!-- Recording indicator (hidden by default) -->
+  <div class="recording-indicator" id="recordingIndicator" style="display: none;">
+    <div class="recording-dot"></div>    <span>Recording voice note...</span>
+    <span id="recordingTimer">00:00</span>
+  </div>
+
+  <!-- Location Modal -->
+  <div class="modal-overlay" id="locationModal" style="display: none;">
+    <div class="modal">
+      <i class="fas fa-map-marker-alt" style="font-size: 3rem; color: #2dd4bf; margin-bottom: 1rem;"></i>
+      <h3>Share Your Location</h3>
+      <p id="locationStatus">Fetching your location...</p>
+      <div id="locationActions">
+        <button onclick="shareCurrentLocation()" style="background: var(--gradient-location);">
+          <i class="fas fa-location-arrow"></i> Share My Location
+        </button>
+        <button class="cancel" onclick="closeLocationModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ---- APP STATE ----
+      let contacts = [];
+      let conversations = {};
+      let currentContactId = null;
+      let isRecording = false;
+      let mediaRecorder = null;
+      let audioChunks = [];
+      let recordingInterval = null;
+      let recordingSeconds = 0;
+
+      // ---- DOM ELEMENTS ----
+      const contactListEl = document.getElementById('contactList');
+      const messagesContainer = document.getElementById('messagesContainer');
+      const emptyChat = document.getElementById('emptyChat');
+      const chatHeader = document.getElementById('chatHeader');
+      const messageInputArea = document.getElementById('messageInputArea');
+      const activeAvatar = document.getElementById('activeAvatar');
+      const activeName = document.getElementById('activeName');
+      const activeStatus = document.getElementById('activeStatus');
+      const messageInput = document.getElementById('messageInput');
+      const sendButton = document.getElementById('sendButton');
+      const searchInput = document.getElementById('searchInput');
+      const syncContactsBtn = document.getElementById('syncContactsBtn');
+      const voiceBtn = document.getElementById('voiceBtn');
+      const locationBtn = document.getElementById('locationBtn');
+      const recordingIndicator = document.getElementById('recordingIndicator');
+      const recordingTimer = document.getElementById('recordingTimer');
+      const locationModal = document.getElementById('locationModal');
+      const locationStatus = document.getElementById('locationStatus');
+      const toastContainer = document.getElementById('toastContainer');
+
+      // ---- TOAST NOTIFICATIONS ----
+      function showToast(message, icon = 'info-circle') {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `<i class="fas fa-${icon}"></i> ${message}`;
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+      }
+
+      // ---- CONTACTS API ----
+      async function fetchDeviceContacts() {
+        if (!('contacts' in navigator && 'ContactsManager' in window)) {
+          showToast('📱 Contacts API not fully supported. Try Chrome on Android.', 'exclamation-triangle');
+          return [];
+        }
+
+        try {
+          const props = ['name', 'tel', 'email', 'icon'];
+          const opts = { multiple: true };
+          const deviceContacts = await navigator.contacts.select(props, opts);
+          
+          return deviceContacts.map((c, index) => {
+            const name = c.name?.[0] || 'Unknown';
+            const phone = c.tel?.[0] || '';
+            const email = c.email?.[0] || '';
+            return {
+              id: `device-${index}-${Date.now()}`,
+              name: name,
+              avatar: name.charAt(0).toUpperCase(),
+              status: 'offline',
+              lastMsg: phone || email || 'No contact info',
+              isDevice: true,
+              phone: phone,
+              email: email
+            };
+          });
+        } catch (err) {
+          console.warn('Contacts access error:', err);
+          showToast('⚠️ Please allow contacts permission to import.', 'exclamation-triangle');
+          return [];
+        }
+      }
+
+      async function syncContacts() {
+        syncContactsBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing...';
+        syncContactsBtn.disabled = true;
+        
+        const deviceContacts = await fetchDeviceContacts();
+        const existingNames = new Set(contacts.map(c => c.name.toLowerCase()));
+        const newContacts = deviceContacts.filter(c => !existingNames.has(c.name.toLowerCase()));
+        
+        if (newContacts.length > 0) {
+          contacts = [...contacts, ...newContacts];
+          newContacts.forEach(c => {
+            if (!conversations[c.id]) {
+              conversations[c.id] = [];
+            }
+          });
+          renderContacts(searchInput.value);
+          showToast(`✅ Added ${newContacts.length} contact(s)!`, 'check-circle');
+        } else if (deviceContacts.length === 0) {
+          showToast('No contacts selected or permission denied.', 'info-circle');
+        } else {
+          showToast('All contacts already imported.', 'info-circle');
+        }
+        
+        syncContactsBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Import Contacts';
+        syncContactsBtn.disabled = false;
+      }
+
+      // ---- RENDER FUNCTIONS ----
+      function renderContacts(filterText = '') {
+        if (!contactListEl) return;
+        
+        if (contacts.length === 0) {
+          contactListEl.innerHTML = `
+            <div class="no-contacts">
+              <i class="fas fa-address-book"></i>
+              <p>No contacts yet</p>
+              <p style="font-size:0.75rem;">Click "Import Contacts" to start</p>
+            </div>
+          `;
+          return;
+        }
+
+        const filtered = contacts.filter(c => 
+          c.name.toLowerCase().includes(filterText.toLowerCase())
+        );
+        
+        if (filtered.length === 0) {
+          contactListEl.innerHTML = `
+            <div class="no-contacts">
+              <i class="fas fa-search"></i>
+              <p>No contacts found</p>
+            </div>
+          `;
+          return;
+        }
+
+        contactListEl.innerHTML = filtered.map(contact => {
+          const activeClass = contact.id === currentContactId ? 'active' : '';
+          const statusIcon = contact.status === 'online' 
+            ? '<i class="fas fa-circle" style="color: #2dd4bf; font-size: 0.5rem;"></i>' 
+            : '<i class="fas fa-circle" style="color: #6b7280; font-size: 0.5rem;"></i>';
+          const deviceIcon = contact.isDevice ? ' <i class="fas fa-mobile-alt" style="font-size:0.65rem; color:#a5b4fc;"></i>' : '';
+          return `
+            <div class="contact-item ${activeClass}" data-contact-id="${contact.id}">
+              <div class="avatar">${contact.avatar}</div>
+              <div class="contact-info">
+                <h4>${contact.name}${deviceIcon}</h4>
+                <p>${statusIcon} ${contact.lastMsg || 'Start chatting'}</p>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        document.querySelectorAll('.contact-item').forEach(item => {
+          item.addEventListener('click', function() {
+            const id = this.getAttribute('data-contact-id');
+            if (id === currentContactId) return;
+            switchConversation(id);
+          });
+        });
+      }
+
+      function switchConversation(contactId) {
+        currentContactId = contactId;
+        const contact = contacts.find(c => c.id === contactId);
+        if (!contact) return;
+
+        // Show chat UI
+        emptyChat.style.display = 'none';
+        chatHeader.style.display = 'flex';
+        messageInputArea.style.display = 'flex';
+        messagesContainer.classList.add('messages-container');
+
+        activeAvatar.textContent = contact.avatar;
+        activeName.textContent = contact.name;
+        if (contact.status === 'online') {
+          activeStatus.innerHTML = '<i class="fas fa-circle" style="font-size: 0.5rem; color: #2dd4bf;"></i> online now';
+        } else {
+          activeStatus.innerHTML = '<i class="fas fa-circle" style="font-size: 0.5rem; color: #6b7280;"></i> offline';
+        }
+
+        if (!conversations[contactId]) {
+          conversations[contactId] = [];
+        }
+        renderMessages(contactId);
+        renderContacts(searchInput.value);
+      }
+
+      function renderMessages(contactId) {
+        if (!messagesContainer) return;
+        const msgs = conversations[contactId] || [];
+        
+        if (msgs.length === 0) {
+          messagesContainer.innerHTML = `
+            <div style="text-align:center; color:#8b8fbc; padding:2rem;">
+              <i class="fas fa-comment-dots" style="font-size:2rem; display:block; margin-bottom:0.5rem;"></i>
+              Start the conversation!
+            </div>
+          `;
+          return;
+        }
+
+        messagesContainer.innerHTML = msgs.map(msg => {
+          const rowClass = msg.sender === 'outgoing' ? 'outgoing' : 'incoming';
+          
+          if (msg.type === 'voice') {
+            return `
+              <div class="message-row ${rowClass}">
+                <div class="bubble">
+                  <div class="voice-message">
+                    <i class="fas fa-play-circle" onclick="playVoiceNote(this, '${msg.audioUrl || '#'}')" title="Play voice note"></i>
+                    <div class="voice-wave">
+                      ${Array(7).fill('<div class="wave-bar"></div>').join('')}
+                    </div>
+                    <span style="font-size:0.7rem; color:#ff6b6b;">${msg.duration || '0:05'}</span>
+                  </div>
+                  <span class="time-stamp">🎤 Voice note · ${msg.time || ''}</span>
+                </div>
+              </div>
+            `;
+          }
+          
+          if (msg.type === 'location') {
+            return `
+              <div class="message-row ${rowClass}">
+                <div class="bubble">
+                  <div class="location-share" onclick="viewLocation(${msg.lat}, ${msg.lng}, '${msg.locationName || 'Shared location'}')">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div class="location-info">
+                      <strong>📍 Shared Location</strong>
+                      ${msg.locationName || 'Location shared'}
+                    </div>
+                  </div>
+                  <span class="time-stamp">📍 Location · ${msg.time || ''}</span>
+                </div>
+              </div>
+            `;
+          }
+
+          return `
+            <div class="message-row ${rowClass}">
+              <div class="bubble">
+                ${msg.text}
+                <span class="time-stamp">${msg.time || ''}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      // ---- MESSAGING ----
+      function sendTextMessage() {
+        const text = messageInput.value.trim();
+        if (text === '' || !currentContactId) return;
+        
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        conversations[currentContactId].push({
+          sender: 'outgoing',
+          text: text,
+          time: timeStr,
+          type: 'text'
+        });
+        
+        renderMessages(currentContactId);
+        messageInput.value = '';
+        
+        // Update last message in contacts
+        updateContactLastMsg(currentContactId, text);
+        renderContacts(searchInput.value);
+      }
+
+      function updateContactLastMsg(contactId, msg) {
+        const contact = contacts.find(c => c.id === contactId);
+        if (contact) {
+          contact.lastMsg = msg.length > 30 ? msg.substring(0, 30) + '...' : msg;
+        }
+      }
+
+      // ---- VOICE NOTES ----
+      async function startRecording() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          showToast('🎤 Microphone not supported in this browser.', 'exclamation-triangle');
+          return;
+        }
+
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = [];
+
+          mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+              audioChunks.push(event.data);
+            }
+          };
+
+          mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            saveVoiceNote(audioUrl, recordingSeconds);
+            
+            // Stop all tracks
+            stream.getTracks().forEach(track => track.stop());
+          };
+
+          mediaRecorder.start();
+          isRecording = true;
+          recordingSeconds = 0;
+          
+          voiceBtn.classList.add('recording');
+          voiceBtn.innerHTML = '<i class="fas fa-stop"></i>';
+          recordingIndicator.style.display = 'flex';
+          recordingTimer.textContent = '00:00';
+          
+          recordingInterval = setInterval(() => {
+            recordingSeconds++;
+            const mins = Math.floor(recordingSeconds / 60);
+            const secs = recordingSeconds % 60;
+            recordingTimer.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+          }, 1000);
+
+          showToast('🎤 Recording voice note...', 'microphone');
+        } catch (err) {
+          showToast('❌ Microphone access denied.', 'exclamation-triangle');
+          console.error('Mic error:', err);
+        }
+      }
+
+      function stopRecording() {
+        if (mediaRecorder && isRecording) {
+          mediaRecorder.stop();
+          isRecording = false;
+          
+          clearInterval(recordingInterval);
+          voiceBtn.classList.remove('recording');
+          voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+          recordingIndicator.style.display = 'none';
+          
+          showToast('✅ Voice note sent!', 'check-circle');
+        }
+      }
+
+      function saveVoiceNote(audioUrl, duration) {
+        if (!currentContactId) return;
+        
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const mins = Math.floor(duration / 60);
+        const secs = duration % 60;
+        const durationStr = `${mins}:${String(secs).padStart(2, '0')}`;
+        
+        conversations[currentContactId].push({
+          sender: 'outgoing',
+          type: 'voice',
+          audioUrl: audioUrl,
+          duration: durationStr,
+          time: timeStr
+        });
+        
+        renderMessages(currentContactId);
+        updateContactLastMsg(currentContactId, '🎤 Voice note');
+        renderContacts(searchInput.value);
+      }
+
+      // ---- LOCATION SHARING ----
+      function openLocationModal() {
+        locationModal.style.display = 'flex';
+        locationStatus.textContent = 'Fetching your location...';
+        document.getElementById('locationActions').style.display = 'none';
+        
+        if (!navigator.geolocation) {
+          locationStatus.textContent = 'Geolocation not supported in this browser.';
+          document.getElementById('locationActions').style.display = 'flex';
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            locationStatus.innerHTML = `
+              <i class="fas fa-check-circle" style="color:#2dd4bf;"></i> 
+              Location found!<br>
+              <small>Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}</small>
+            `;
+            document.getElementById('locationActions').style.display = 'flex';
+            // Store for sharing
+            window.pendingLocation = { lat: latitude, lng: longitude };
+          },
+          (error) => {
+            locationStatus.textContent = '⚠️ Unable to fetch location. Please allow location access.';
+            document.getElementById('locationActions').style.display = 'flex';
+            console.error('Location error:', error);
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      }
+
+      function shareCurrentLocation() {
+        if (!window.pendingLocation || !currentContactId) {
+          closeLocationModal();
+          return;
+        }
+
+        const { lat, lng } = window.pendingLocation;
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const locationName = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+        
+        conversations[currentContactId].push({
+          sender: 'outgoing',
+          type: 'location',
+          lat: lat,
+          lng: lng,
+          locationName: locationName,
+          time: timeStr
+        });
+        
+        renderMessages(currentContactId);
+        updateContactLastMsg(currentContactId, '📍 Shared location');
+        renderContacts(searchInput.value);
+        closeLocationModal();
+        showToast('📍 Location shared!', 'map-marker-alt');
+      }
+
+      function closeLocationModal() {
+        locationModal.style.display = 'none';
+        window.pendingLocation = null;
+      }
+
+      function viewLocation(lat, lng, name) {
+        const url = `https://www.google.com/maps?q=${lat},${lng}`;
+        window.open(url, '_blank');
+        showToast(`🗺️ Opening ${name} in Google Maps`, 'map');
+      }
+
+      function playVoiceNote(element, audioUrl) {
+        if (!audioUrl || audioUrl === '#') {
+          showToast('🎤 Voice note preview (demo)', 'info-circle');
+          return;
+        }
+        const audio = new Audio(audioUrl);
+        audio.play();
+        element.className = 'fas fa-pause-circle';
+        audio.onended = () => {
+          element.className = 'fas fa-play-circle';
+        };
+      }
+
+      // ---- EVENT LISTENERS ----
+      sendButton.addEventListener('click', sendTextMessage);
+      messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          sendTextMessage();
+        }
+      });
+
+      searchInput.addEventListener('input', function(e) {
+        renderContacts(e.target.value);
+      });
+
+      syncContactsBtn.addEventListener('click', syncContacts);
+
+      voiceBtn.addEventListener('click', function() {
+        if (!currentContactId) {
+          showToast('Please select a contact first.', 'info-circle');
+          return;
+        }
+        if (isRecording) {
+          stopRecording();
+        } else {
+          startRecording();
+        }
+      });
+
+      locationBtn.addEventListener('click', function() {
+        if (!currentContactId) {
+          showToast('Please select a contact first.', 'info-circle');
+          return;
+        }
+        openLocationModal();
+      });
+
+      // Close location modal on overlay click
+      locationModal.addEventListener('click', function(e) {
+        if (e.target === locationModal) {
+          closeLocationModal();
+        }
+      });
+
+      // Video/voice call placeholders
+      document.querySelector('.fa-video')?.addEventListener('click', () => {
+        showToast('📹 Video calling coming soon!', 'video');
+      });
+      document.querySelector('.fa-phone-alt')?.addEventListener('click', () => {
+        showToast('📞 Voice calls available in next update.', 'phone');
+      });
+
+      // ---- INITIALIZE ----
+      function init() {
+        renderContacts();
+        // Show empty state initially
+        emptyChat.style.display = 'flex';
+        chatHeader.style.display = 'none';
+        messageInputArea.style.display = 'none';
+      }
+
+      // Expose functions to global scope for onclick handlers
+      window.shareCurrentLocation = shareCurrentLocation;
+      window.closeLocationModal = closeLocationModal;
+      window.viewLocation = viewLocation;
+      window.playVoiceNote = playVoiceNote;
+
+      init();
+      showToast('👋 Welcome! Import your contacts to start chatting.', 'smile');
+    })();
+  </script>
+</body>
+</html>
